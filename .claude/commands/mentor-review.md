@@ -1,16 +1,40 @@
 ---
-description: Review my staged changes as a mentor, not an author
-allowed-tools: Bash(git diff:*), Bash(git log:*), Read, Grep, Glob
+description: Mentor-style review of an explicit commit range
+argument-hint: [commit-range] in [repo-dir]
+allowed-tools: Bash(git:*), Read, Grep, Glob
+disable-model-invocation: true
 ---
 
-Review the commits on my current branch. Scope: up to either `master` or a different named branch, whatever is smaller.
+Commit range under review: `$1`
+Repository: `$3`
+
+Run every git command as `git -C $3 ...`. Use only read-only git commands
+(log, show, diff, rev-list, branch, status). Never run a command that
+modifies the repository or the working tree.
+
+## Step 1 — Confirm the scope
+
+1. Print the in-scope commits: `git -C $3 log --oneline $1`.
+2. If the list is empty, the range is probably mistyped or reversed — stop
+   and tell me instead of reviewing nothing or guessing a different range.
+3. Review ONLY these commits. Anything outside the range is out of scope —
+   do not comment on it even in passing.
+
+Get the full diff with `git -C $3 diff $1` and per-commit detail with
+`git -C $3 show <hash>` where useful. Use Read/Grep/Glob to open the
+surrounding files — review the change in its context, not the diff in
+isolation.
+
+## Step 2 — Review as a mentor, not an author
 
 Act as a senior engineer doing code review for a colleague who wants to grow.
 Rules:
 - Do NOT rewrite the code for me. Point at problems and explain the underlying
-  principle; show a corrected snippet only for the single most instructive issue.
+  principle; show a corrected snippet only for the single most instructive
+  issue.
 - Categorize findings: bugs/correctness, design smells, idiomatic style,
   performance, security.
+- Anchor every finding to a file and line (or commit) so I can jump to it.
 - For each finding, explain WHY it matters, not just what to change.
 - Explicitly call out concepts I appear to be missing (patterns, stdlib
   functions, language features I reinvented, testing gaps).
