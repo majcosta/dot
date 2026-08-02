@@ -1,0 +1,129 @@
+[include]
+  path = ./.gituser
+
+[core]
+  editor = emacs -nw
+  excludesFile = ~/.gitignore-global
+  pager = most
+
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+
+[push]
+  default = simple
+	autoSetupRemote = true
+
+[log]
+  follow = true
+  abbrevCommit = true
+  date = iso
+
+[diff]
+  renames = copies
+
+[pretty]
+  compact = format:%C(red)%h%C(reset) -%C(yellow)%d%C(reset) %<(120,trunc)%s %C(green)(%cd ~ %cr) %C(bold blue)<%aN %C(cyan)- %cN%C(blue)>%C(reset)
+  morecompact = format:%C(red)%h%C(reset) -%C(yellow)%d%C(reset) %<(110,trunc)%s %C(green)(%cd) %C(bold blue)<%aN %C(cyan)- %cN%C(blue)>%C(reset)
+  mostcompact = format:%C(red)%h%C(reset) -%C(yellow)%d%C(reset) %<(60,trunc)%s %C(green)(%cr)%C(reset)
+
+  compacthistory = format:%C(red)%h%C(reset) - %<(60,trunc)%s %C(green)(%cd)%C(reset)
+
+[format]
+  pretty = fuller
+
+[mailmap]
+  file = ~/.mailmap
+
+[merge]
+  conflictstyle = diff3
+
+[alias]
+  # Reminder: shell commands in .gitconfig run at the repo's top level, so
+  # do not use the shell syntax when it can be helped.
+  s = status
+
+  # Graph-print current branch
+  l         = log --pretty=mostcompact --graph
+  lg        = log --pretty=compact --date=short --graph
+
+  # Show all merge commits for branches or files
+  lm        = log --pretty=mostcompact --first-parent -m
+  lgm       = log --pretty=morecompact --date=short --first-parent -m
+  lg-m      = log --pretty=morecompact --date=short --first-parent -m
+
+  lm-history = log --pretty=compacthistory --date=short --abbrev=12 --first-parent -m --decorate-refs-exclude=refs/tags
+
+  # Graph-print all local branches
+  lb        = log --pretty=mostcompact --graph --decorate --branches
+  lgb       = log --pretty=compact --date=short --graph --decorate --branches
+  lg-b      = log --pretty=compact --date=short --graph --decorate --branches
+
+  # Graph-print all branches, including remotes
+  lg-all    = log --pretty=compact --date=short --graph --decorate --all
+
+  # Fetch and branch a Github PR
+  pr = "!f(){ \
+    if [ \"$#\" -lt 1 ] || [ \"$#\" -gt 2 ]; then \
+      echo \"Expected arguments: [remote (default: origin)] github-pr-num\"; \
+      exit 1; \
+    fi; \
+    REMOTE=\"origin\"; \
+    PR_NUM=\"$1\"; \
+    if [ \"$#\" -eq 2 ]; then \
+      REMOTE=\"$1\"; \
+      PR_NUM=\"$2\"; \
+    fi; \
+    if [ \"$(git remote | grep \"^${REMOTE}\\$\" | wc -l)\" -eq 0 ]; then \
+      echo \"Git remote '${REMOTE}' does not exist!\"; \
+      exit 2; \
+    fi; \
+    git fetch \"${REMOTE}\" \"pull/${PR_NUM}/head\"; \
+    git checkout -b \"github-pr${PR_NUM}\" FETCH_HEAD; \
+  };f"
+
+  deleted-files = "!f(){ git lg --diff-filter=D --summary \"$@\" ;};f"
+  tracked-files = ls-tree -r master --name-only
+  authors = "!f(){ git shortlog -sne \"$@\" | grep -vf ~/.gitignore-users ;};f"
+  committers = "!f(){ git authors -c \"$@\" ;};f"
+
+  pl = pull --rebase
+  # Pull latest master and then rebase current branch onto master
+  plom = pull --rebase origin master:master
+
+  # List all branches (remotes included)
+  bl = branch -al
+
+  ch = checkout
+
+  sh = show -m --first-parent
+  shm = show -m --first-parent --color-moved
+
+  # Shorthand for `rebase --onto targetbranch somebranch~ somebranch`, to
+  # rebase a branch with a single commit onto another branch
+  ro = "!f(){ git rebase --onto $1 $2~ $2 ;};f"
+
+  sl = stash list
+  ss  = "!sh -c 'git stash show -p stash@{$1}' -" # Show the diff of a given stash number
+  sa  = "!sh -c 'git stash apply stash@{$1}' -"   # Apply the diff from a given stash number
+  sd  = "!sh -c 'git stash drop stash@{$1}' -"    # Drop a given stash by number
+
+  # TODO: These aliases need to be piped into `less -R` for paging. Fix this.
+  blame-color = "!~/scripts/git-blame-colorizer.sh commit"
+  blame-age = "!~/scripts/git-blame-colorizer.sh age"
+  sync = "!f(){ \
+	git ch master && \
+	git fetch upstream --prune && \
+	git fetch origin --prune && \
+	git merge --ff-only upstream/master && \
+	git push origin; \
+	};f"
+  pr = "!f(){ \
+  git fetch upstream pull/$1/head:$2; \
+  git ch $2; \
+  };f"
+[user]
+	email = marco.antonio.costa@gmail.com
+	name = Marco Antonio J. Costa
