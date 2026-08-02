@@ -6,24 +6,22 @@ disable-model-invocation: true
 ---
 
 Commit range under review: `$1`
-Repository: `$3`
 
-Run every git command as `git -C $3 ...`. Use only read-only git commands
+Run every git command as `git ...`. Use only read-only git commands
 (log, show, diff, rev-list, branch, status). Never run a command that
 modifies the repository or the working tree.
 
 ## Step 1 — Confirm the scope
 
-1. Print the in-scope commits: `git -C $3 log --oneline $1`.
+1. Print the in-scope commits: `git log --oneline $1`.
 2. If the list is empty, the range is probably mistyped or reversed — stop
    and tell me instead of reviewing nothing or guessing a different range.
 3. Review ONLY these commits. Anything outside the range is out of scope —
    do not comment on it even in passing.
 
-Get the full diff with `git -C $3 diff $1` and per-commit detail with
-`git -C $3 show <hash>` where useful. Use Read/Grep/Glob to open the
-surrounding files — review the change in its context, not the diff in
-isolation.
+Get the full diff with `git diff $1` and per-commit detail with `git
+show <hash>` where useful. Use Read/Grep/Glob to open the surrounding
+files — review the change in its context, not the diff in isolation.
 
 ## Step 2 — Review as a mentor, not an author
 
